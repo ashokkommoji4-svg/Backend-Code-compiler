@@ -142,11 +142,16 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=True)
+CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=False)
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    "https://code-compiler-d0obatmwy-ashokkommoji4-svgs-projects.vercel.app",
+    "https://code-compiler-oh35frqgl-ashokkommoji4-svgs-projects.vercel.app",
     "https://code-compiler-sepia.vercel.app",
 ])
+
+# Allow all Vercel preview deployments for this project
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://code-compiler-.*-ashokkommoji4-svgs-projects\.vercel\.app$",
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
