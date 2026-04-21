@@ -11,21 +11,31 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
+
+# Initialize environ
+env = environ.Env(
+    DEBUG=(bool, False)
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read .env file if it exists
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-uv*px2w*96sa&oa2g7b4v3klyrg=_s3n8jxh0-!v*5(&yvz=a2'
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-uv*px2w*96sa&oa2g7b4v3klyrg=_s3n8jxh0-!v*5(&yvz=a2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.render.com', 'backend-code-compiler-3.onrender.com'])
 
 
 # Application definition
@@ -47,9 +57,14 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'config.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': env('CHANNEL_LAYER_BACKEND', default='channels.layers.InMemoryChannelLayer'),
     },
 }
+
+if 'redis' in env('CHANNEL_LAYER_BACKEND', default='').lower():
+    CHANNEL_LAYERS['default']['CONFIG'] = {
+        "hosts": [env('REDIS_URL', default='redis://localhost:6379/0')],
+    }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,10 +101,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
 
 
@@ -128,7 +140,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=True)
+
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
+    "https://code-compiler-d0obatmwy-ashokkommoji4-svgs-projects.vercel.app",
+    "https://code-compiler-sepia.vercel.app",
+])
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
