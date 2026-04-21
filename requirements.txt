@@ -1,0 +1,8 @@
+django
+djangorestframework
+django-cors-headers
+uvicorn[standard]
+python-dotenv
+pydantic-settings
+channels
+daphne
